@@ -93,16 +93,18 @@ function MiniCalendar({
 
   return (
     <button className="mini-calendar" onClick={onClick} type="button" aria-label={`${monthName} ${getYear(month)}`}>
-      <div className="mini-month-name">{monthName.slice(0, 3)}</div>
+      <div className="mini-month-name">{monthName}</div>
       <div className="mini-grid">
         {days.map((day) => {
           const dateStr = toDateString(day);
           const inMonth = isSameMonth(day, month);
 
-          let className = 'mini-day';
           if (!inMonth) {
-            className += ' other';
-          } else if (dateSets.periodDates.has(dateStr)) {
+            return <span key={dateStr} className="mini-day other" />;
+          }
+
+          let className = 'mini-day';
+          if (dateSets.periodDates.has(dateStr)) {
             className += ' period';
           } else if (dateSets.predictedPeriodDates.has(dateStr)) {
             className += ' predicted';
@@ -112,7 +114,7 @@ function MiniCalendar({
             className += ' fertile';
           }
 
-          return <span key={dateStr} className={className} />;
+          return <span key={dateStr} className={className}>{day.getDate()}</span>;
         })}
       </div>
     </button>
