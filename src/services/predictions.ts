@@ -109,8 +109,10 @@ export function getDayOfCycle(
 
 /**
  * Estimate fertility window for a cycle.
- * Ovulation is ~14 days before the next period start.
- * Fertile window is ~6 days ending on ovulation day.
+ * Ovulation is ~14 days before the next period start (luteal phase ~14 days).
+ * Fertile window: 4 days before ovulation + ovulation day + 2 days after.
+ * Based on: sperm survives up to 5 days, egg viable ~24h after ovulation.
+ * Matches Flo's calculation model.
  */
 export function estimateFertilityWindow(
   cycleStartDate: string,
@@ -126,8 +128,8 @@ export function estimateFertilityWindow(
   if (ovulationDayNum < 5) return null;
 
   const ovulation = addDays(start, ovulationDayNum);
-  const fertileStart = subDays(ovulation, 5);
-  const fertileEnd = subDays(ovulation, 1);
+  const fertileStart = subDays(ovulation, 4);
+  const fertileEnd = addDays(ovulation, 2);
 
   return {
     fertileStart: format(fertileStart, 'yyyy-MM-dd'),

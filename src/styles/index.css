@@ -1299,7 +1299,7 @@ input:focus-visible {
   width: 100%;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: rgba(var(--text-rgb), 0.15);
+  background: rgba(var(--text-rgb), 0.3);
 }
 
 .mini-day.other {
