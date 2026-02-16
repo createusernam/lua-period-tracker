@@ -40,13 +40,28 @@ You assist the Head of Product (the user) by:
 
 ## Workflow
 
-1. Brainstorm feature / identify bug with Product
-2. Ask clarifying questions until fully understood
-3. Create discovery task for agents to gather codebase context
-4. Break into phases with acceptance criteria
-5. Create agent prompts for each phase
-6. Review agent status reports, catch mistakes
-7. Approve for deployment
+### Recommended Team Pipeline
+
+```
+1. Brainstorm     (CTO + PM + UX Researcher)  — define problem, validate value
+2. CJM / Flow    (CJM Analyst)                — map user journey step-by-step
+3. Mockup        (Design Prototyper)           — HTML mockups for discussion
+4. Spec          (Tech Spec + UI Spec writers) — after mockups approved
+5. Implement     (Frontend Developer)          — from approved specs
+6. Review        (QA + CTO)                    — code review, edge cases
+7. Fix           (Frontend Developer)          — address review findings
+8. Verify        (run tests + build)           — final check
+```
+
+Pipeline optimization: steps 2-4 can overlap. QA reviews specs BEFORE implementation, not just after.
+
+### Quick workflow (for small features/fixes)
+
+1. Brainstorm with Product (clarify requirements)
+2. Break into phases with acceptance criteria
+3. Implement + test
+4. Review findings, fix
+5. Verify build
 
 ## Implementation Review Checklist
 
@@ -68,17 +83,30 @@ When reviewing agent work:
 - [ ] Estimated cycles: last cycle in history marked with `~` prefix
 - [ ] Pass pre-computed prediction to avoid redundant calculations
 
-## Agent Team
+## Agent Team (10 agents)
 
-| Agent | File | Use For |
-|-------|------|---------|
-| `ux-designer` | UI/layout/responsive/flows | Visual components, CSS, mobile |
-| `ux-researcher` | ДКЦП analysis, user research | Segment validation, value prop |
-| `qa-specialist` | Test strategy, exploratory testing | Test plans, bug hunting |
-| `frontend-developer` | React/TS implementation | Components, stores, services |
-| `tech-spec-writer` | Technical specs | Scenarios, data flow, file changes |
-| `ui-spec-writer` | UI specs | Wireframes, interactions, states |
-| `product-manager` | Scope control, prioritization | Plans, risk tracking |
+| Agent | Use For |
+|-------|---------|
+| `product-manager` | Scope control, prioritization, risk tracking |
+| `ux-researcher` | ДКЦП analysis, segment validation, value prop |
+| `cjm-analyst` | Customer journey maps, touchpoint-to-screen mapping |
+| `design-prototyper` | Interactive HTML mockups for stakeholder discussion |
+| `ux-designer` | Visual components, CSS, responsive layout |
+| `tech-spec-writer` | Technical specs: scenarios, data flow, file changes |
+| `ui-spec-writer` | UI specs: wireframes, interactions, all states |
+| `frontend-developer` | React/TS implementation: components, stores, services |
+| `qa-specialist` | Test strategy, exploratory testing, bug hunting |
+
+### Skills (shortcuts)
+
+| Skill | Command | What it does |
+|-------|---------|-------------|
+| Sprint | `/sprint` | Full brainstorm → implement → review → fix cycle |
+| Review | `/review` | QA + CTO review of recent changes |
+| Test | `/test` | Run tests + build check |
+| Deploy | `/deploy` | Build + deploy to GitHub Pages |
+| Mockup | `/mockup` | Create interactive HTML prototype |
+| CJM | `/cjm` | Map customer journey with ДКЦП integration |
 
 ## Context Files
 

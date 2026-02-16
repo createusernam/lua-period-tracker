@@ -91,19 +91,33 @@ Build produces static files in `dist/`. Deploy to GitHub Pages or Vercel. Instal
 
 ### Agent Team
 
-8 agents in `.claude/agents/`:
+10 agents in `.claude/agents/`:
 | Agent | Personality | Role |
 |-------|------------|------|
 | `cto` | Werner Vogels | Architecture, coordination, code review |
 | `product-manager` | Marty Cagan | Scope, prioritization, risk tracking |
+| `ux-researcher` | Экселенц (ДКЦП) | Value prop validation, user research |
+| `cjm-analyst` | CJM + ДКЦП | Customer journey maps, touchpoint-to-screen mapping |
+| `design-prototyper` | Design With Code | Interactive HTML mockups for discussion |
 | `tech-spec-writer` | Joel Spolsky | Technical specs (scenarios, data flow, file changes) |
 | `ui-spec-writer` | Steve Krug | UI specs (wireframes, interactions, states) |
-| `qa-specialist` | James Bach | Test strategy, edge cases, exploratory testing |
-| `frontend-developer` | Dan Abramov | React/TS implementation |
 | `ux-designer` | Dieter Rams | UI design in code, CSS, responsive |
-| `ux-researcher` | Экселенц (ДКЦП) | Value prop validation, user research |
+| `frontend-developer` | Dan Abramov | React/TS implementation |
+| `qa-specialist` | James Bach | Test strategy, edge cases, exploratory testing |
 
-Preferred workflow: brainstorm (CTO + PM) → spec (tech-spec + ui-spec) → implement (frontend-dev) → review (QA + CTO) → fix (frontend-dev)
+Full workflow: brainstorm (CTO + PM + UX) → CJM (cjm-analyst) → mockup (design-prototyper) → spec (tech-spec + ui-spec) → implement (frontend-dev) → review (QA + CTO) → fix → verify
+
+### Skills
+
+6 skills in `.claude/skills/`:
+| Skill | Command | Description |
+|-------|---------|-------------|
+| Sprint | `/sprint` | Full brainstorm → implement → review → fix cycle |
+| Review | `/review` | QA + CTO review of recent changes |
+| Test | `/test` | Run tests + TypeScript build check |
+| Deploy | `/deploy` | Build + deploy to GitHub Pages |
+| Mockup | `/mockup` | Create interactive HTML prototype |
+| CJM | `/cjm` | Map customer journey with ДКЦП integration |
 
 ### Implemented Features (from Flo analysis)
 
