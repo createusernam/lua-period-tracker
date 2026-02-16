@@ -25,10 +25,12 @@
   --bg-rgb: 255, 255, 255;
   --surface-rgb: 242, 242, 247;
   --border-rgb: 200, 200, 204;
-  --period-rgb: 232, 90, 120;
+  --period-rgb: 255, 107, 138;
   --predicted-rgb: 240, 175, 192;
   --today-rgb: 62, 130, 210;
   --danger-rgb: 220, 50, 40;
+  --fertile-rgb: 123, 198, 126;
+  --ovulation-rgb: 76, 175, 80;
 
   /* Semantic tokens (derived) */
   --color-text: rgb(var(--text-rgb));
@@ -40,6 +42,8 @@
   --color-period: rgb(var(--period-rgb));
   --color-predicted: rgba(var(--period-rgb), 0.15);
   --color-today: rgb(var(--today-rgb));
+  --color-fertile: rgb(var(--fertile-rgb));
+  --color-ovulation: rgb(var(--ovulation-rgb));
 
   /* Spacing scale (density-based, em units) */
   --sp-xs: calc(var(--density) * 0.25em);
@@ -511,13 +515,70 @@ input:focus-visible {
 }
 
 .calendar-day.period {
-  background: var(--color-period);
+  background: rgba(var(--period-rgb), 0.55);
   color: white;
   font-weight: 500;
 }
 
 .calendar-day.predicted {
   background: var(--color-predicted);
+}
+
+/* Predicted period — dashed circle */
+.calendar-day.predicted-period {
+  color: rgb(var(--period-rgb));
+  font-weight: 500;
+  position: relative;
+}
+.calendar-day.predicted-period::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(var(--period-rgb), 0.5);
+  pointer-events: none;
+}
+
+/* Fertility — muted green circle */
+.calendar-day.fertile {
+  background: rgba(var(--fertile-rgb), 0.15);
+  color: var(--color-fertile);
+}
+
+/* Ovulation — slightly more prominent green */
+.calendar-day.ovulation {
+  background: rgba(var(--ovulation-rgb), 0.2);
+  color: var(--color-ovulation);
+  font-weight: 600;
+}
+
+/* Predicted fertility — dashed green circle */
+.calendar-day.predicted-fertile {
+  color: var(--color-fertile);
+  position: relative;
+}
+.calendar-day.predicted-fertile::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(var(--fertile-rgb), 0.35);
+  pointer-events: none;
+}
+
+/* Predicted ovulation — dashed green circle */
+.calendar-day.predicted-ovulation {
+  color: var(--color-ovulation);
+  font-weight: 600;
+  position: relative;
+}
+.calendar-day.predicted-ovulation::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(var(--ovulation-rgb), 0.4);
+  pointer-events: none;
 }
 
 /* Today during period: dot becomes white */
@@ -1255,6 +1316,488 @@ input:focus-visible {
 
 .mini-day.fertile {
   background: rgba(70, 180, 160, 0.4);
+}
+
+/* ============= Phase Status ============= */
+
+.phase-status {
+  text-align: center;
+  padding: var(--sp-xl) var(--content-padding) var(--sp-m);
+}
+
+.phase-name {
+  font-size: 1.125em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.15em;
+  color: var(--color-text);
+}
+
+.phase-name.menstrual,
+.phase-name.premenstrual {
+  color: var(--color-period);
+}
+
+.phase-name.ovulation {
+  color: var(--color-ovulation);
+}
+
+.phase-detail {
+  font-size: 0.9375em;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.phase-detail .separator {
+  margin: 0 0.15em;
+  color: rgba(var(--text-secondary-rgb), 0.4);
+}
+
+/* ============= Language Switcher ============= */
+
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.8125em;
+  font-weight: 500;
+  margin-left: var(--sp-s);
+}
+
+.lang-switcher span {
+  cursor: pointer;
+  color: rgba(var(--text-rgb), 0.25);
+  transition: color 0.5s ease;
+}
+
+.lang-switcher span.active {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.lang-switcher span:hover:not(.active) {
+  color: rgba(var(--text-rgb), 0.5);
+  transition: color 0s;
+}
+
+.lang-divider {
+  cursor: default !important;
+  color: rgba(var(--text-rgb), 0.12) !important;
+}
+
+/* ============= Header (Sprint 2) ============= */
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-date {
+  font-size: 0.875em;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  letter-spacing: -0.005em;
+}
+
+.calendar-icon-btn {
+  padding: var(--sp-xs);
+  color: rgba(var(--text-rgb), 0.35);
+  transition: color 0.5s ease;
+}
+
+.calendar-icon-btn:hover {
+  color: var(--color-text);
+  transition: color 0s;
+}
+
+/* ============= Home Calendar ============= */
+
+.home-calendar {
+  padding: 0 var(--content-padding);
+}
+
+/* ============= Log Period Button (Sprint 2) ============= */
+
+.log-period-btn {
+  display: block;
+  width: calc(100% - 2 * var(--content-padding));
+  margin: var(--sp-l) var(--content-padding);
+  background: var(--color-period);
+  color: white;
+  font-size: 1em;
+  font-weight: 600;
+  padding: 0.9em 1.5em;
+  border-radius: var(--radius-m);
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.log-period-btn:active {
+  transform: scale(0.98);
+  opacity: 0.85;
+}
+
+/* ============= Section Divider ============= */
+
+.section-divider {
+  height: 1px;
+  background: var(--color-divider);
+  margin: var(--sp-m) var(--content-padding);
+}
+
+/* ============= Section Title Link ============= */
+
+.section-title-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--sp-m) var(--content-padding) var(--sp-s);
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.section-title-link svg {
+  color: rgba(var(--text-rgb), 0.3);
+  flex-shrink: 0;
+}
+
+/* ============= Fluctuation Snippet ============= */
+
+.fluctuation-section {
+  padding: var(--sp-m) var(--content-padding);
+}
+
+.fluctuation-title {
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: var(--sp-s);
+}
+
+.fluctuation-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-xs);
+}
+
+.fluctuation-row {
+  font-size: 0.875em;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+/* ============= Onboarding Card ============= */
+
+.onboarding-card {
+  padding: var(--sp-xl) var(--content-padding);
+  text-align: center;
+}
+
+.onboarding-title {
+  font-size: 1.25em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--sp-xs);
+}
+
+.onboarding-subtitle {
+  font-size: 0.9375em;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--sp-l);
+  line-height: 1.4;
+}
+
+.onboarding-lang-picker {
+  display: flex;
+  gap: var(--sp-xs);
+  justify-content: center;
+  margin-bottom: var(--sp-l);
+}
+
+.onboarding-lang-btn {
+  padding: 0.4em 1em;
+  font-size: 0.875em;
+  font-weight: 500;
+  border-radius: var(--radius-s);
+  background: rgba(var(--text-rgb), 0.04);
+  color: var(--color-text-secondary);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.onboarding-lang-btn.active {
+  background: rgba(var(--period-rgb), 0.1);
+  color: var(--color-period);
+  font-weight: 600;
+}
+
+.onboarding-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--density) * 0.4em);
+}
+
+.onboarding-privacy {
+  font-size: 0.75em;
+  color: rgba(var(--text-secondary-rgb), 0.6);
+  margin-top: var(--sp-l);
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.onboarding-privacy svg {
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+.import-error {
+  color: var(--color-period);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0.5rem 1rem;
+}
+
+/* ============= Scroll Calendar ============= */
+
+.scroll-calendar-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.scroll-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-m) var(--content-padding);
+  padding-top: max(var(--sp-m), env(safe-area-inset-top));
+  border-bottom: 1px solid var(--color-divider);
+  background: var(--color-bg);
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.scroll-close-btn {
+  padding: var(--sp-xs);
+  color: rgba(var(--text-rgb), 0.4);
+  transition: color 0.5s ease;
+}
+
+.scroll-close-btn:hover {
+  color: var(--color-text);
+  transition: color 0s;
+}
+
+.scroll-view-toggle {
+  display: flex;
+  gap: 2px;
+  background: rgba(var(--text-rgb), 0.04);
+  border-radius: var(--radius-s);
+  padding: 2px;
+}
+
+.scroll-view-toggle button {
+  padding: 0.35em 0.85em;
+  font-size: 0.8125em;
+  font-weight: 500;
+  border-radius: calc(var(--radius-s) - 2px);
+  color: var(--color-text-secondary);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.scroll-view-toggle button.active {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.scroll-header-spacer {
+  width: 36px;
+}
+
+.scroll-today-btn {
+  font-size: 0.875em;
+  font-weight: 500;
+  color: var(--color-period);
+  padding: var(--sp-xs) var(--sp-s);
+}
+
+.scroll-edit-title {
+  font-size: 1.0625em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.scroll-edit-instruction {
+  text-align: center;
+  font-size: 0.8125em;
+  color: var(--color-text-secondary);
+  padding: var(--sp-xs) var(--content-padding);
+  border-bottom: 1px solid var(--color-divider);
+  flex-shrink: 0;
+}
+
+.scroll-weekday-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  padding: var(--sp-s) var(--content-padding) var(--sp-xs);
+  border-bottom: 1px solid var(--color-divider);
+  background: var(--color-bg);
+  flex-shrink: 0;
+}
+
+.scroll-calendar-months {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  padding: 0 var(--content-padding);
+}
+
+.scroll-calendar-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+.scroll-month-block {
+  padding: var(--sp-m) 0 var(--sp-s);
+}
+
+.scroll-month-title {
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: var(--sp-s);
+}
+
+/* ============= Edit Mode Day States ============= */
+
+.edit-day {
+  cursor: pointer;
+  position: relative;
+}
+
+.edit-day::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(var(--text-rgb), 0.12);
+}
+
+.edit-day.selected {
+  background: rgba(var(--period-rgb), 0.85);
+  color: white;
+  font-weight: 500;
+}
+
+.edit-day.selected::before {
+  border-color: transparent;
+}
+
+.edit-day.future-disabled {
+  color: rgba(var(--text-rgb), 0.12);
+  cursor: default;
+}
+
+.edit-day.future-disabled::before {
+  border-color: rgba(var(--text-rgb), 0.06);
+}
+
+.edit-day.other-month::before {
+  border-color: transparent;
+}
+
+.edit-day.predicted-period::before {
+  border: 1.5px dashed rgba(var(--period-rgb), 0.35);
+}
+
+.today-label-text {
+  position: absolute;
+  top: -1px;
+  font-size: 0.5em;
+  font-weight: 700;
+  color: var(--color-today);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.check-overlay {
+  position: absolute;
+  bottom: 3px;
+}
+
+/* ============= Edit Footer ============= */
+
+.scroll-edit-footer {
+  display: flex;
+  gap: var(--sp-s);
+  padding: var(--sp-m) var(--content-padding);
+  padding-bottom: calc(var(--sp-m) + var(--safe-bottom));
+  border-top: 1px solid var(--color-divider);
+  background: var(--color-bg);
+  flex-shrink: 0;
+}
+
+.scroll-edit-footer .btn-secondary,
+.scroll-edit-footer .btn-primary {
+  flex: 1;
+}
+
+.save-message {
+  flex: 1;
+  text-align: center;
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--color-period);
+  padding: 0.9em 0;
+}
+
+/* ============= Floating Edit FAB ============= */
+
+.scroll-edit-fab {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-period);
+  color: white;
+  font-size: 0.875em;
+  font-weight: 600;
+  padding: 0.75em 1.5em;
+  border-radius: 2em;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(var(--period-rgb), 0.35);
+  z-index: 20;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.scroll-edit-fab:active {
+  transform: translateX(-50%) scale(0.96);
+  opacity: 0.9;
 }
 
 /* ============= Responsive (desktop) ============= */

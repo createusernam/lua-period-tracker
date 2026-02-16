@@ -4,17 +4,16 @@ import {
   endOfMonth,
   startOfWeek,
   endOfWeek,
-  addDays,
-  min as dateMin,
   eachDayOfInterval,
   isSameMonth,
-  parseISO,
   format,
   getYear,
 } from 'date-fns';
 import { usePeriodStore } from '../stores/periodStore';
 import { toDateString } from '../utils';
-import { estimateFertilityWindow } from '../services/predictions';
+import { buildDateSets, type CalendarDateSets } from './HomeCalendar';
+import { useI18n } from '../i18n/context';
+import { translations } from '../i18n/translations';
 
 interface Props {
   onMonthSelect: (month: Date) => void;
@@ -22,52 +21,13 @@ interface Props {
 
 export default function YearView({ onMonthSelect }: Props) {
   const [year, setYear] = useState(getYear(new Date()));
-  const { periods, prediction } = usePeriodStore();
+  const { periods, prediction, futureCycles } = usePeriodStore();
+  const { t, lang } = useI18n();
+  const monthNames = translations[lang]['cal.months'] as readonly string[];
 
-  // Period dates
-  const periodDates = useMemo(() => {
-    const dates = new Set<string>();
-    const now = new Date();
-    for (const p of periods) {
-      const start = parseISO(p.startDate);
-      // Cap ongoing periods to 14 days
-      const end = p.endDate ? parseISO(p.endDate) : dateMin([addDays(start, 14), now]);
-      eachDayOfInterval({ start, end }).forEach((d) =>
-        dates.add(toDateString(d))
-      );
-    }
-    return dates;
-  }, [periods]);
-
-  // Predicted dates
-  const predictedDates = useMemo(() => {
-    const dates = new Set<string>();
-    if (!prediction) return dates;
-    const start = parseISO(prediction.predictedStart);
-    const end = parseISO(prediction.predictedEnd);
-    if (start > end) return dates;
-    eachDayOfInterval({ start, end }).forEach((d) => {
-      const key = toDateString(d);
-      if (!periodDates.has(key)) dates.add(key);
-    });
-    return dates;
-  }, [prediction, periodDates]);
-
-  // Fertility dates (for predicted cycle)
-  const fertilityDates = useMemo(() => {
-    const dates = new Set<string>();
-    if (!prediction) return dates;
-    const fertility = estimateFertilityWindow(
-      prediction.predictedStart,
-      prediction.avgCycleLength
-    );
-    if (!fertility) return dates;
-    eachDayOfInterval({
-      start: parseISO(fertility.fertileStart),
-      end: parseISO(fertility.fertileEnd),
-    }).forEach((d) => dates.add(toDateString(d)));
-    return dates;
-  }, [prediction]);
+  const dateSets = useMemo(() => {
+    return buildDateSets(periods, prediction, futureCycles);
+  }, [periods, prediction, futureCycles]);
 
   const months = useMemo(() => {
     const result: Date[] = [];
@@ -83,13 +43,13 @@ export default function YearView({ onMonthSelect }: Props) {
   return (
     <div className="year-view">
       <div className="year-nav">
-        <button onClick={handlePrev} aria-label="Previous year">
+        <button onClick={handlePrev} aria-label={t('cal.prev_year')}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
         <span className="year-label">{year}</span>
-        <button onClick={handleNext} aria-label="Next year">
+        <button onClick={handleNext} aria-label={t('cal.next_year')}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <polyline points="9 18 15 12 9 6" />
           </svg>
@@ -100,9 +60,8 @@ export default function YearView({ onMonthSelect }: Props) {
           <MiniCalendar
             key={format(month, 'yyyy-MM')}
             month={month}
-            periodDates={periodDates}
-            predictedDates={predictedDates}
-            fertilityDates={fertilityDates}
+            monthName={monthNames[month.getMonth()]}
+            dateSets={dateSets}
             onClick={() => onMonthSelect(month)}
           />
         ))}
@@ -113,17 +72,15 @@ export default function YearView({ onMonthSelect }: Props) {
 
 interface MiniCalendarProps {
   month: Date;
-  periodDates: Set<string>;
-  predictedDates: Set<string>;
-  fertilityDates: Set<string>;
+  monthName: string;
+  dateSets: CalendarDateSets;
   onClick: () => void;
 }
 
 function MiniCalendar({
   month,
-  periodDates,
-  predictedDates,
-  fertilityDates,
+  monthName,
+  dateSets,
   onClick,
 }: MiniCalendarProps) {
   const days = useMemo(() => {
@@ -135,21 +92,25 @@ function MiniCalendar({
   }, [month]);
 
   return (
-    <button className="mini-calendar" onClick={onClick} type="button" aria-label={format(month, 'MMMM yyyy')}>
-      <div className="mini-month-name">{format(month, 'MMM')}</div>
+    <button className="mini-calendar" onClick={onClick} type="button" aria-label={`${monthName} ${getYear(month)}`}>
+      <div className="mini-month-name">{monthName.slice(0, 3)}</div>
       <div className="mini-grid">
         {days.map((day) => {
           const dateStr = toDateString(day);
           const inMonth = isSameMonth(day, month);
-          const isPeriod = periodDates.has(dateStr);
-          const isPredicted = predictedDates.has(dateStr);
-          const isFertile = fertilityDates.has(dateStr);
 
           let className = 'mini-day';
-          if (!inMonth) className += ' other';
-          else if (isPeriod) className += ' period';
-          else if (isPredicted) className += ' predicted';
-          else if (isFertile) className += ' fertile';
+          if (!inMonth) {
+            className += ' other';
+          } else if (dateSets.periodDates.has(dateStr)) {
+            className += ' period';
+          } else if (dateSets.predictedPeriodDates.has(dateStr)) {
+            className += ' predicted';
+          } else if (dateSets.pastOvulationDates.has(dateStr) || dateSets.futureOvulationDates.has(dateStr)) {
+            className += ' ovulation';
+          } else if (dateSets.pastFertilityDates.has(dateStr) || dateSets.futureFertilityDates.has(dateStr)) {
+            className += ' fertile';
+          }
 
           return <span key={dateStr} className={className} />;
         })}

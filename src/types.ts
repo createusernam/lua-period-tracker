@@ -41,5 +41,31 @@ export interface CycleInfo {
   estimated: boolean;
 }
 
-export type Tab = 'calendar' | 'history';
-export type CycleFilter = 'all' | 'last3' | 'last6';
+/** Cycle phase in the 5-phase model */
+export type CyclePhase = 'menstrual' | 'follicular' | 'ovulation' | 'luteal' | 'premenstrual';
+
+/** Phase info returned by getCyclePhase() */
+export interface PhaseInfo {
+  phase: CyclePhase;
+  dayInPhase: number;
+  phaseDays: number;
+}
+
+/** Multi-cycle prediction: one future cycle */
+export interface FutureCycle {
+  cycleNumber: number;
+  predictedStart: string;
+  predictedEnd: string;
+  fertility: FertilityWindow | null;
+  avgCycleLength: number;
+  avgPeriodDuration: number;
+}
+
+/** App screen for navigation */
+export type Screen = 'home' | 'calendar' | 'edit' | 'settings';
+
+/** Calendar sub-view */
+export type CalendarViewMode = 'month' | 'year';
+
+/** Supported languages */
+export type Language = 'ru' | 'en';

@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 import { parseISO, format } from 'date-fns';
+import { ru } from 'date-fns/locale/ru';
 import { usePeriodStore } from '../stores/periodStore';
 import { buildCycleHistory } from '../services/predictions';
+import { useI18n } from '../i18n/context';
 
 const CHART_W = 350;
 const CHART_H = 180;
@@ -20,69 +22,79 @@ interface DataPoint {
   value: number;
 }
 
+/** Generate smooth cubic bezier path from data points */
+function smoothPath(points: { x: number; y: number }[]): string {
+  if (points.length < 2) return '';
+  const d = [`M${points[0].x},${points[0].y}`];
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1];
+    const curr = points[i];
+    const cpx = (prev.x + curr.x) / 2;
+    d.push(`C${cpx},${prev.y} ${cpx},${curr.y} ${curr.x},${curr.y}`);
+  }
+  return d.join(' ');
+}
+
 export default function CycleDynamicsChart() {
   const { periods, prediction } = usePeriodStore();
+  const { t, lang } = useI18n();
+  const locale = lang === 'ru' ? ru : undefined;
 
   const data = useMemo((): DataPoint[] => {
     const cycles = buildCycleHistory(periods, prediction);
     const valid = cycles
       .filter((c) => c.cycleLength > 0 && c.cycleLength < 90 && !c.estimated)
       .slice(-12);
-    // Show year suffix when data spans multiple years
     const years = new Set(valid.map((c) => c.startDate.slice(0, 4)));
     const showYear = years.size > 1;
     return valid.map((c) => ({
-      label: format(parseISO(c.startDate), showYear ? "MMM ''yy" : 'MMM'),
+      label: format(parseISO(c.startDate), showYear ? "MMM ''yy" : 'MMM', { locale }),
       value: c.cycleLength,
     }));
-  }, [periods, prediction]);
+  }, [periods, prediction, locale]);
 
   if (data.length < 2) {
-    return null; // Not enough data for a chart
+    return null;
   }
 
-  // Y range: slightly beyond data + normal range
   const allValues = data.map((d) => d.value);
-  const minY = Math.min(NORMAL_MIN - 3, ...allValues) ;
+  const minY = Math.min(NORMAL_MIN - 3, ...allValues);
   const maxY = Math.max(NORMAL_MAX + 3, ...allValues);
   const rangeY = maxY - minY;
 
   const toX = (i: number) => PAD_L + (i / (data.length - 1)) * PLOT_W;
   const toY = (v: number) => PAD_T + PLOT_H - ((v - minY) / rangeY) * PLOT_H;
 
-  const polylinePoints = data
-    .map((d, i) => `${toX(i)},${toY(d.value)}`)
-    .join(' ');
-
-  // Normal range band coordinates
   const bandY1 = toY(NORMAL_MAX);
   const bandY2 = toY(NORMAL_MIN);
   const bandH = bandY2 - bandY1;
 
-  // Y-axis ticks
   const yTicks = [];
   const step = rangeY <= 15 ? 5 : 10;
   for (let v = Math.ceil(minY / step) * step; v <= maxY; v += step) {
     yTicks.push(v);
   }
 
-  // Check if all cycles are in normal range
   const allNormal = allValues.every((v) => v >= NORMAL_MIN && v <= NORMAL_MAX);
+
+  // Build smooth path
+  const pathPoints = data.map((d, i) => ({ x: toX(i), y: toY(d.value) }));
+  const pathD = smoothPath(pathPoints);
 
   return (
     <div className="dynamics-chart">
       <div className="dynamics-header">
-        <span className="dynamics-title">Cycle Dynamics</span>
+        <span className="dynamics-title">{t('home.dynamics')}</span>
       </div>
       {allNormal && (
         <div className="dynamics-note">
-          Last {data.length} cycles in normal range
+          {t('chart.normal_note', { count: data.length })}
         </div>
       )}
       <svg
         viewBox={`0 0 ${CHART_W} ${CHART_H}`}
         className="dynamics-svg"
-        aria-label={`Cycle dynamics chart showing ${data.length} cycles`}
+        aria-label={t('chart.aria_label', { count: data.length })}
       >
         {/* Normal range band */}
         <rect
@@ -109,8 +121,8 @@ export default function CycleDynamicsChart() {
           </g>
         ))}
 
-        {/* Data line */}
-        <polyline points={polylinePoints} className="data-line" />
+        {/* Data line — smooth bezier curve */}
+        <path d={pathD} className="data-line" />
 
         {/* Data points with value labels */}
         {data.map((d, i) => (
@@ -139,7 +151,7 @@ export default function CycleDynamicsChart() {
         ))}
       </svg>
       <div className="dynamics-legend">
-        <span className="legend-band-icon" /> Normal range (21–35 days)
+        <span className="legend-band-icon" /> {t('chart.normal_range')}
       </div>
     </div>
   );

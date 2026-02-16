@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 import { db } from '../db';
-import type { Period, CyclePrediction } from '../types';
-import { predictNextPeriod, getDayOfCycle } from '../services/predictions';
+import type { Period, CyclePrediction, FutureCycle, PhaseInfo } from '../types';
+import { predictNextPeriod, getDayOfCycle, predictNextNPeriods, getCyclePhase } from '../services/predictions';
 
 interface PeriodState {
   periods: Period[];
   prediction: CyclePrediction | null;
   cycleDay: { day: number; total: number; daysUntilNext: number | null; stale: boolean; lastPeriodDate: string } | null;
+  futureCycles: FutureCycle[];
+  phase: PhaseInfo | null;
   loading: boolean;
   error: string | null;
 
@@ -23,6 +25,8 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
   periods: [],
   prediction: null,
   cycleDay: null,
+  futureCycles: [],
+  phase: null,
   loading: true,
   error: null,
 
@@ -36,10 +40,17 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
           (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
         );
         const prediction = predictNextPeriod(sorted);
+        const cycleDay = getDayOfCycle(sorted, prediction);
+        const futureCycles = predictNextNPeriods(sorted, 12, 6);
+        const phase = cycleDay && prediction
+          ? getCyclePhase(cycleDay.day, prediction.avgCycleLength, prediction.avgPeriodDuration)
+          : null;
         set({
           periods: sorted,
           prediction,
-          cycleDay: getDayOfCycle(sorted, prediction),
+          cycleDay,
+          futureCycles,
+          phase,
           loading: false,
           error: null,
         });

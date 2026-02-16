@@ -1,10 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import CycleStatus from '../components/CycleStatus';
+import PhaseStatus from '../components/PhaseStatus';
 import CycleHistory from '../components/CycleHistory';
-import TabBar from '../components/TabBar';
+import { I18nProvider } from '../i18n/context';
 import { usePeriodStore } from '../stores/periodStore';
 import { db } from '../db';
+
+function renderWithI18n(ui: React.ReactElement) {
+  return render(<I18nProvider>{ui}</I18nProvider>);
+}
 
 beforeEach(async () => {
   await db.periods.clear();
@@ -15,16 +19,19 @@ beforeEach(async () => {
     periods: [],
     prediction: null,
     cycleDay: null,
+    futureCycles: [],
+    phase: null,
     loading: false,
     error: null,
   });
+  // Reset language to English for consistent test output
+  localStorage.setItem('lua-language', 'en');
 });
 
-describe('CycleStatus', () => {
+describe('PhaseStatus', () => {
   it('shows empty state when no periods', () => {
-    render(<CycleStatus />);
-    expect(screen.getByText('No periods logged')).toBeInTheDocument();
-    expect(screen.getByText('Import or log your first period')).toBeInTheDocument();
+    renderWithI18n(<PhaseStatus />);
+    expect(screen.getByText('No data')).toBeInTheDocument();
   });
 
   it('shows cycle day when periods exist', () => {
@@ -34,7 +41,7 @@ describe('CycleStatus', () => {
       periods: [{ id: 1, startDate: fiveDaysAgo.toISOString().slice(0, 10), endDate: null }],
       cycleDay: { day: 6, total: 28, daysUntilNext: null, stale: false, lastPeriodDate: fiveDaysAgo.toISOString().slice(0, 10) },
     });
-    render(<CycleStatus />);
+    renderWithI18n(<PhaseStatus />);
     expect(screen.getByText('Day 6 of ~28')).toBeInTheDocument();
   });
 
@@ -43,7 +50,7 @@ describe('CycleStatus', () => {
       periods: [{ id: 1, startDate: '2022-01-01', endDate: '2022-01-04' }],
       cycleDay: { day: 800, total: 28, daysUntilNext: null, stale: true, lastPeriodDate: '2022-01-01' },
     });
-    render(<CycleStatus />);
+    renderWithI18n(<PhaseStatus />);
     expect(screen.getByText('No recent periods')).toBeInTheDocument();
   });
 
@@ -52,14 +59,14 @@ describe('CycleStatus', () => {
       periods: [{ id: 1, startDate: '2023-01-01', endDate: '2023-01-04' }],
       cycleDay: { day: 10, total: 28, daysUntilNext: null, stale: false, lastPeriodDate: '2023-01-01' },
     });
-    render(<CycleStatus />);
+    renderWithI18n(<PhaseStatus />);
     expect(screen.getByText('Log one more period for predictions')).toBeInTheDocument();
   });
 });
 
 describe('CycleHistory', () => {
   it('shows empty state when no completed periods', () => {
-    render(<CycleHistory />);
+    renderWithI18n(<CycleHistory />);
     expect(screen.getByText('No cycle data')).toBeInTheDocument();
   });
 
@@ -79,13 +86,9 @@ describe('CycleHistory', () => {
         stddev: 0,
       },
     });
-    render(<CycleHistory />);
+    renderWithI18n(<CycleHistory />);
     // Should show year header
     expect(screen.getByText('2023')).toBeInTheDocument();
-    // Should show filter pills
-    expect(screen.getByText('All')).toBeInTheDocument();
-    expect(screen.getByText('Last 3')).toBeInTheDocument();
-    expect(screen.getByText('Last 6')).toBeInTheDocument();
     // Should show legend
     expect(screen.getByText('Period')).toBeInTheDocument();
     expect(screen.getByText('Fertile')).toBeInTheDocument();
@@ -97,25 +100,31 @@ describe('CycleHistory', () => {
       periods: [{ id: 1, startDate: '2023-01-01', endDate: '2023-01-04' }],
       prediction: null,
     });
-    render(<CycleHistory />);
+    renderWithI18n(<CycleHistory />);
     // One completed period shows as one cycle
     expect(screen.getByText('2023')).toBeInTheDocument();
   });
-});
 
-describe('TabBar', () => {
-  it('renders calendar and history tabs', () => {
-    const onChange = () => {};
-    render(<TabBar active="calendar" onChange={onChange} />);
-    expect(screen.getByText('Calendar')).toBeInTheDocument();
-    expect(screen.getByText('History')).toBeInTheDocument();
-  });
-
-  it('marks active tab', () => {
-    const onChange = () => {};
-    const { container } = render(<TabBar active="history" onChange={onChange} />);
-    const buttons = container.querySelectorAll('button');
-    expect(buttons[0].className).not.toContain('active');
-    expect(buttons[1].className).toContain('active');
+  it('respects limit prop', () => {
+    usePeriodStore.setState({
+      periods: [
+        { id: 1, startDate: '2023-01-01', endDate: '2023-01-04' },
+        { id: 2, startDate: '2023-01-29', endDate: '2023-02-01' },
+        { id: 3, startDate: '2023-02-26', endDate: '2023-03-01' },
+        { id: 4, startDate: '2023-03-26', endDate: '2023-03-29' },
+        { id: 5, startDate: '2023-04-23', endDate: '2023-04-26' },
+      ],
+      prediction: {
+        predictedStart: '2023-05-21',
+        predictedEnd: '2023-05-24',
+        avgCycleLength: 28,
+        avgPeriodDuration: 4,
+        confidence: 'high',
+        stddev: 0,
+      },
+    });
+    const { container } = renderWithI18n(<CycleHistory limit={2} />);
+    const items = container.querySelectorAll('.cycle-item');
+    expect(items.length).toBe(2);
   });
 });

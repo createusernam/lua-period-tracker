@@ -1,5 +1,5 @@
 import { addDays, subDays, differenceInDays, parseISO, format } from 'date-fns';
-import type { Period, CyclePrediction, FertilityWindow, CycleInfo } from '../types';
+import type { Period, CyclePrediction, FertilityWindow, CycleInfo, FutureCycle, PhaseInfo } from '../types';
 
 function weightedAverage(values: number[], maxCount: number): number {
   const slice = values.slice(-maxCount);
@@ -191,4 +191,104 @@ export function buildCycleHistory(
   }
 
   return cycles;
+}
+
+/**
+ * Generate N future cycle predictions.
+ * Each cycle chains forward from the previous using the same weighted average.
+ */
+export function predictNextNPeriods(
+  periods: Period[],
+  n: number = 12,
+  windowSize: number = 6
+): FutureCycle[] {
+  const basePrediction = predictNextPeriod(periods, windowSize);
+  if (!basePrediction) return [];
+
+  const results: FutureCycle[] = [];
+  let currentStart = basePrediction.predictedStart;
+  const avgCycle = basePrediction.avgCycleLength;
+  const avgPeriod = basePrediction.avgPeriodDuration;
+
+  for (let i = 0; i < n; i++) {
+    const start = parseISO(currentStart);
+    const end = addDays(start, avgPeriod - 1);
+    const fertility = estimateFertilityWindow(currentStart, avgCycle);
+
+    results.push({
+      cycleNumber: i + 1,
+      predictedStart: currentStart,
+      predictedEnd: format(end, 'yyyy-MM-dd'),
+      fertility,
+      avgCycleLength: avgCycle,
+      avgPeriodDuration: avgPeriod,
+    });
+
+    currentStart = format(addDays(start, avgCycle), 'yyyy-MM-dd');
+  }
+
+  return results;
+}
+
+/**
+ * Determine the current cycle phase based on day of cycle.
+ * 5-phase model: menstrual → follicular → ovulation → luteal → premenstrual.
+ * Ovulation estimated at cycleLength - 14 (luteal phase is ~14 days).
+ */
+export function getCyclePhase(
+  dayOfCycle: number,
+  cycleLength: number,
+  periodDuration: number = 5
+): PhaseInfo | null {
+  if (dayOfCycle < 1 || cycleLength < 18) return null;
+
+  const ovulationDay = cycleLength - 14;
+
+  // Guard: if ovulation falls during or before period ends, model breaks down
+  if (ovulationDay <= periodDuration) return null;
+
+  const premenstrualStart = cycleLength - 3;
+
+  // Menstrual phase
+  if (dayOfCycle <= periodDuration) {
+    return {
+      phase: 'menstrual',
+      dayInPhase: dayOfCycle,
+      phaseDays: periodDuration,
+    };
+  }
+
+  // Follicular phase
+  if (dayOfCycle < ovulationDay) {
+    return {
+      phase: 'follicular',
+      dayInPhase: dayOfCycle - periodDuration,
+      phaseDays: ovulationDay - periodDuration - 1,
+    };
+  }
+
+  // Ovulation (single day)
+  if (dayOfCycle === ovulationDay) {
+    return {
+      phase: 'ovulation',
+      dayInPhase: 1,
+      phaseDays: 1,
+    };
+  }
+
+  // Luteal phase
+  if (dayOfCycle < premenstrualStart) {
+    return {
+      phase: 'luteal',
+      dayInPhase: dayOfCycle - ovulationDay,
+      phaseDays: premenstrualStart - ovulationDay - 1,
+    };
+  }
+
+  // Premenstrual (including overdue days past cycleLength)
+  return {
+    phase: 'premenstrual',
+    dayInPhase: dayOfCycle - premenstrualStart + 1,
+    phaseDays: cycleLength - premenstrualStart + 1,
+  };
 }
