@@ -9,9 +9,11 @@ export default function FluctuationSnippet() {
 
   const stats = useMemo(() => {
     const cycles = buildCycleHistory(periods, prediction);
-    const completed = cycles.filter((c) => !c.estimated && c.cycleLength > 0 && c.cycleLength < 90);
-    if (completed.length < 2) return null;
+    const allCompleted = cycles.filter((c) => !c.estimated && c.cycleLength > 0 && c.cycleLength < 90);
+    if (allCompleted.length < 2) return null;
 
+    // Use last 12 cycles for range stats
+    const completed = allCompleted.slice(-12);
     const lengths = completed.map((c) => c.cycleLength);
     const minLen = Math.min(...lengths);
     const maxLen = Math.max(...lengths);

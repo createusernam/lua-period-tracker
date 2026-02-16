@@ -36,7 +36,7 @@ export default function PhaseStatus({ dimmed }: Props) {
     return (
       <div className="phase-status">
         <div className="phase-detail">
-          {cycleDay ? t('status.day_of', { day: cycleDay.day, total: 28 }) : ''}
+          {cycleDay ? t('status.day', { day: cycleDay.day }) : ''}
         </div>
         <div className="phase-detail">{t('status.log_more')}</div>
       </div>
@@ -58,7 +58,8 @@ export default function PhaseStatus({ dimmed }: Props) {
     } else if (cycleDay.daysUntilNext === 0) {
       countdownText = t('status.period_today');
     } else {
-      countdownText = t('status.period_overdue', { days: Math.abs(cycleDay.daysUntilNext) });
+      const absDays = Math.abs(cycleDay.daysUntilNext);
+      countdownText = t(absDays === 1 ? 'status.period_overdue_1' : 'status.period_overdue', { days: absDays });
     }
   }
 
@@ -70,7 +71,7 @@ export default function PhaseStatus({ dimmed }: Props) {
       <div className="phase-detail">
         {cycleDay && (
           <>
-            <span>{t('status.day_of', { day: cycleDay.day, total: cycleDay.total })}</span>
+            <span>{t('status.day', { day: cycleDay.day })}</span>
             {countdownText && (
               <>
                 <span className="separator"> · </span>

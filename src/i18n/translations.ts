@@ -8,9 +8,10 @@ export const translations = {
     'phase.premenstrual': 'Предменструальная фаза',
 
     // Phase status
-    'status.day_of': 'День {day} из ~{total}',
+    'status.day': 'День {day}',
     'status.period_in': 'До месячных ~{days} д.',
     'status.period_today': 'Ожидается ~сегодня',
+    'status.period_overdue_1': 'Задержка ~{days} день',
     'status.period_overdue': 'Задержка ~{days} д.',
     'status.during_period': 'Месячные: день {day}',
     'status.no_recent': 'Нет недавних месячных',
@@ -118,9 +119,10 @@ export const translations = {
     'phase.luteal': 'Luteal phase',
     'phase.premenstrual': 'Premenstrual phase',
 
-    'status.day_of': 'Day {day} of ~{total}',
+    'status.day': 'Day {day}',
     'status.period_in': 'Period in ~{days} days',
     'status.period_today': 'Period expected ~today',
+    'status.period_overdue_1': '~{days} day overdue',
     'status.period_overdue': '~{days} days overdue',
     'status.during_period': 'Period: day {day}',
     'status.no_recent': 'No recent periods',

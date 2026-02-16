@@ -53,7 +53,6 @@ export default function ScrollCalendar({
   const scrollRef = useRef<HTMLDivElement>(null);
   const todayRef = useRef<HTMLDivElement>(null);
   const [saving, setSaving] = useState(false);
-  const [saveMsg, setSaveMsg] = useState('');
 
   // Selected days for edit mode
   const initialSelected = useMemo(() => {
@@ -151,13 +150,11 @@ export default function ScrollCalendar({
     try {
       const changes = computePeriodChanges(periods, selectedDays);
       await onSave(changes);
-      setSaveMsg(t('edit.saved'));
-      setTimeout(() => onClose(), 800);
+      onClose();
     } catch {
-      setSaveMsg(t('edit.save_error'));
       setSaving(false);
     }
-  }, [onSave, saving, periods, selectedDays, onClose, t]);
+  }, [onSave, saving, periods, selectedDays, onClose]);
 
   const handleMonthSelectFromYear = useCallback((month: Date) => {
     onViewModeChange('month');
@@ -243,18 +240,12 @@ export default function ScrollCalendar({
 
       {mode === 'edit' && (
         <div className="scroll-edit-footer">
-          {saveMsg ? (
-            <div className="save-message">{saveMsg}</div>
-          ) : (
-            <>
-              <button className="btn-secondary" onClick={onClose} disabled={saving}>
-                {t('edit.cancel')}
-              </button>
-              <button className="btn-primary" onClick={handleSave} disabled={saving || !hasChanges}>
-                {saving ? t('edit.saving') : t('edit.save')}
-              </button>
-            </>
-          )}
+          <button className="btn-secondary" onClick={onClose} disabled={saving}>
+            {t('edit.cancel')}
+          </button>
+          <button className="btn-primary" onClick={handleSave} disabled={saving || !hasChanges}>
+            {saving ? t('edit.saving') : t('edit.save')}
+          </button>
         </div>
       )}
 

@@ -42,7 +42,7 @@ describe('PhaseStatus', () => {
       cycleDay: { day: 6, total: 28, daysUntilNext: null, stale: false, lastPeriodDate: fiveDaysAgo.toISOString().slice(0, 10) },
     });
     renderWithI18n(<PhaseStatus />);
-    expect(screen.getByText('Day 6 of ~28')).toBeInTheDocument();
+    expect(screen.getByText('Day 6')).toBeInTheDocument();
   });
 
   it('shows stale data message when data is old', () => {

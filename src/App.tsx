@@ -128,6 +128,7 @@ export default function App() {
     return (
       <div className="app">
         <ScrollCalendar
+          key="edit"
           mode="edit"
           viewMode="month"
           onViewModeChange={() => {}}
