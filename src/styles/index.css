@@ -1299,7 +1299,7 @@ input:focus-visible {
   width: 100%;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: rgba(var(--text-rgb), 0.08);
+  background: rgba(var(--text-rgb), 0.15);
 }
 
 .mini-day.other {
@@ -1316,6 +1316,10 @@ input:focus-visible {
 
 .mini-day.fertile {
   background: rgba(70, 180, 160, 0.4);
+}
+
+.mini-day.ovulation {
+  background: rgba(70, 180, 160, 0.7);
 }
 
 /* ============= Phase Status ============= */

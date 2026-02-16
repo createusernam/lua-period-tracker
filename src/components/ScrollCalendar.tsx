@@ -52,6 +52,7 @@ export default function ScrollCalendar({
   const weekdays = translations[lang]['cal.weekdays'] as readonly string[];
   const scrollRef = useRef<HTMLDivElement>(null);
   const todayRef = useRef<HTMLDivElement>(null);
+  const scrollToMonthRef = useRef<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Selected days for edit mode
@@ -114,10 +115,19 @@ export default function ScrollCalendar({
     return result;
   }, [periods, mode]);
 
-  // Scroll to today on mount
+  // Scroll to today on mount, or to selected month from year view
   useEffect(() => {
     if (viewMode === 'month') {
       requestAnimationFrame(() => {
+        const targetMonth = scrollToMonthRef.current;
+        if (targetMonth) {
+          scrollToMonthRef.current = null;
+          const el = scrollRef.current?.querySelector(`[data-month="${targetMonth}"]`);
+          if (el) {
+            el.scrollIntoView({ block: 'start' });
+            return;
+          }
+        }
         todayRef.current?.scrollIntoView({ block: 'center' });
       });
     }
@@ -157,12 +167,8 @@ export default function ScrollCalendar({
   }, [onSave, saving, periods, selectedDays, onClose]);
 
   const handleMonthSelectFromYear = useCallback((month: Date) => {
+    scrollToMonthRef.current = format(month, 'yyyy-MM');
     onViewModeChange('month');
-    // Scroll to the selected month after switching
-    requestAnimationFrame(() => {
-      const el = scrollRef.current?.querySelector(`[data-month="${format(month, 'yyyy-MM')}"]`);
-      el?.scrollIntoView({ block: 'start' });
-    });
   }, [onViewModeChange]);
 
   // Year view

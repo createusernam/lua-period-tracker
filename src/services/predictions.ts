@@ -127,7 +127,7 @@ export function estimateFertilityWindow(
 
   const ovulation = addDays(start, ovulationDayNum);
   const fertileStart = subDays(ovulation, 5);
-  const fertileEnd = ovulation;
+  const fertileEnd = subDays(ovulation, 1);
 
   return {
     fertileStart: format(fertileStart, 'yyyy-MM-dd'),
