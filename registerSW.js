@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/lua-period-tracker/sw.js', { scope: '/lua-period-tracker/' })})}
