@@ -1,3 +1,4 @@
+import { parseISO, isValid } from 'date-fns';
 import { db } from '../db';
 import type { Period } from '../types';
 
@@ -35,20 +36,35 @@ export async function importData(json: string): Promise<number> {
     if (!p.startDate || !DATE_RE.test(p.startDate)) {
       throw new Error(`Period ${i + 1}: invalid start date`);
     }
-    if (p.endDate !== null && p.endDate !== undefined && !DATE_RE.test(p.endDate)) {
-      throw new Error(`Period ${i + 1}: invalid end date`);
+    // Semantic date validation: regex passes but date itself is invalid (e.g. Feb 30)
+    const parsedStart = parseISO(p.startDate);
+    if (!isValid(parsedStart)) {
+      throw new Error(`Period ${i + 1}: invalid start date`);
     }
-    if (p.endDate && p.endDate < p.startDate) {
-      throw new Error(`Period ${i + 1}: end date before start date`);
+    if (p.endDate !== null && p.endDate !== undefined) {
+      if (!DATE_RE.test(p.endDate)) {
+        throw new Error(`Period ${i + 1}: invalid end date`);
+      }
+      const parsedEnd = parseISO(p.endDate);
+      if (!isValid(parsedEnd)) {
+        throw new Error(`Period ${i + 1}: invalid end date`);
+      }
+      if (p.endDate < p.startDate) {
+        throw new Error(`Period ${i + 1}: end date before start date`);
+      }
     }
   }
 
-  await db.periods.bulkAdd(
-    periods.map((p) => ({
-      startDate: p.startDate,
-      endDate: p.endDate ?? null,
-    }))
-  );
+  // Atomic replace: clear existing data, then insert imported periods
+  await db.transaction('rw', db.periods, async () => {
+    await db.periods.clear();
+    await db.periods.bulkAdd(
+      periods.map((p) => ({
+        startDate: p.startDate,
+        endDate: p.endDate ?? null,
+      }))
+    );
+  });
   return periods.length;
 }
 

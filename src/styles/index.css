@@ -1384,6 +1384,10 @@ input:focus-visible {
   padding: var(--sp-xl) var(--content-padding) var(--sp-m);
 }
 
+.phase-status.dimmed {
+  opacity: 0.4;
+}
+
 .phase-name {
   font-size: 1.125em;
   font-weight: 600;

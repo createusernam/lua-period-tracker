@@ -4,7 +4,9 @@ import PhaseStatus from '../components/PhaseStatus';
 import CycleHistory from '../components/CycleHistory';
 import { I18nProvider } from '../i18n/context';
 import { usePeriodStore } from '../stores/periodStore';
+import { buildCycleHistory } from '../services/predictions';
 import { db } from '../db';
+import type { Period, CyclePrediction } from '../types';
 
 function renderWithI18n(ui: React.ReactElement) {
   return render(<I18nProvider>{ui}</I18nProvider>);
@@ -21,6 +23,15 @@ beforeEach(async () => {
     cycleDay: null,
     futureCycles: [],
     phase: null,
+    cycles: [],
+    dateSets: {
+      periodDates: new Set(),
+      predictedPeriodDates: new Set(),
+      pastFertilityDates: new Set(),
+      futureFertilityDates: new Set(),
+      pastOvulationDates: new Set(),
+      futureOvulationDates: new Set(),
+    },
     loading: false,
     error: null,
   });
@@ -64,6 +75,12 @@ describe('PhaseStatus', () => {
   });
 });
 
+// Helper: set periods + prediction in store, automatically computing cycles
+function setStoreWithCycles(periods: Period[], prediction: CyclePrediction | null) {
+  const cycles = buildCycleHistory(periods, prediction);
+  usePeriodStore.setState({ periods, prediction, cycles });
+}
+
 describe('CycleHistory', () => {
   it('shows empty state when no completed periods', () => {
     renderWithI18n(<CycleHistory />);
@@ -71,13 +88,13 @@ describe('CycleHistory', () => {
   });
 
   it('shows cycle history with dot-bar when data exists', () => {
-    usePeriodStore.setState({
-      periods: [
+    setStoreWithCycles(
+      [
         { id: 1, startDate: '2023-01-01', endDate: '2023-01-04' },
         { id: 2, startDate: '2023-01-29', endDate: '2023-02-01' },
         { id: 3, startDate: '2023-02-26', endDate: '2023-03-01' },
       ],
-      prediction: {
+      {
         predictedStart: '2023-03-26',
         predictedEnd: '2023-03-29',
         avgCycleLength: 28,
@@ -86,7 +103,7 @@ describe('CycleHistory', () => {
         stddev: 0,
         daysLate: 0,
       },
-    });
+    );
     renderWithI18n(<CycleHistory />);
     // Should show year header
     expect(screen.getByText('2023')).toBeInTheDocument();
@@ -97,25 +114,25 @@ describe('CycleHistory', () => {
   });
 
   it('shows only single period in empty cycle state', () => {
-    usePeriodStore.setState({
-      periods: [{ id: 1, startDate: '2023-01-01', endDate: '2023-01-04' }],
-      prediction: null,
-    });
+    setStoreWithCycles(
+      [{ id: 1, startDate: '2023-01-01', endDate: '2023-01-04' }],
+      null,
+    );
     renderWithI18n(<CycleHistory />);
     // One completed period shows as one cycle
     expect(screen.getByText('2023')).toBeInTheDocument();
   });
 
   it('respects limit prop', () => {
-    usePeriodStore.setState({
-      periods: [
+    setStoreWithCycles(
+      [
         { id: 1, startDate: '2023-01-01', endDate: '2023-01-04' },
         { id: 2, startDate: '2023-01-29', endDate: '2023-02-01' },
         { id: 3, startDate: '2023-02-26', endDate: '2023-03-01' },
         { id: 4, startDate: '2023-03-26', endDate: '2023-03-29' },
         { id: 5, startDate: '2023-04-23', endDate: '2023-04-26' },
       ],
-      prediction: {
+      {
         predictedStart: '2023-05-21',
         predictedEnd: '2023-05-24',
         avgCycleLength: 28,
@@ -124,7 +141,7 @@ describe('CycleHistory', () => {
         stddev: 0,
         daysLate: 0,
       },
-    });
+    );
     const { container } = renderWithI18n(<CycleHistory limit={2} />);
     const items = container.querySelectorAll('.cycle-item');
     expect(items.length).toBe(2);

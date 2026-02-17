@@ -11,9 +11,9 @@ import {
 } from 'date-fns';
 import { usePeriodStore } from '../stores/periodStore';
 import { toDateString } from '../utils';
-import { buildDateSets, type CalendarDateSets } from './HomeCalendar';
 import { useI18n } from '../i18n/context';
 import { translations } from '../i18n/translations';
+import type { CalendarDateSets } from '../services/calendarSets';
 
 interface Props {
   onMonthSelect: (month: Date) => void;
@@ -21,13 +21,9 @@ interface Props {
 
 export default function YearView({ onMonthSelect }: Props) {
   const [year, setYear] = useState(getYear(new Date()));
-  const { periods, prediction, futureCycles } = usePeriodStore();
+  const dateSets = usePeriodStore((s) => s.dateSets);
   const { t, lang } = useI18n();
   const monthNames = translations[lang]['cal.months'] as readonly string[];
-
-  const dateSets = useMemo(() => {
-    return buildDateSets(periods, prediction, futureCycles);
-  }, [periods, prediction, futureCycles]);
 
   const months = useMemo(() => {
     const result: Date[] = [];

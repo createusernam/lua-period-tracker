@@ -19,9 +19,8 @@ import { usePeriodStore } from '../stores/periodStore';
 import { useI18n } from '../i18n/context';
 import { translations } from '../i18n/translations';
 import { toDateString } from '../utils';
-import { buildDateSets } from './HomeCalendar';
 import { getDayCircleClass } from './calendarUtils';
-import type { CalendarDateSets } from './HomeCalendar';
+import type { CalendarDateSets } from '../services/calendarSets';
 import type { CalendarViewMode, Period } from '../types';
 import YearView from './YearView';
 
@@ -47,7 +46,8 @@ export default function ScrollCalendar({
   onSave,
   onEditFromCalendar,
 }: Props) {
-  const { periods, prediction, futureCycles } = usePeriodStore();
+  const periods = usePeriodStore((s) => s.periods);
+  const dateSets = usePeriodStore((s) => s.dateSets);
   const { t, lang } = useI18n();
   const weekdays = translations[lang]['cal.weekdays'] as readonly string[];
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -80,11 +80,6 @@ export default function ScrollCalendar({
     }
     return false;
   }, [selectedDays, initialSelected]);
-
-  // Build date sets for visual markers
-  const dateSets = useMemo(() => {
-    return buildDateSets(periods, prediction, futureCycles);
-  }, [periods, prediction, futureCycles]);
 
   // Generate months to render
   const months = useMemo(() => {

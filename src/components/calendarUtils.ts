@@ -1,4 +1,4 @@
-import type { CalendarDateSets } from './HomeCalendar';
+import type { CalendarDateSets } from '../services/calendarSets';
 
 /**
  * Determine the CSS class for a calendar day circle.

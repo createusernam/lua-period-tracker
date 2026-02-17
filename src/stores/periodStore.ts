@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { db } from '../db';
-import type { Period, CyclePrediction, FutureCycle, PhaseInfo } from '../types';
-import { predictNextPeriod, getDayOfCycle, predictNextNPeriods, getCyclePhase } from '../services/predictions';
+import type { Period, CyclePrediction, FutureCycle, PhaseInfo, CycleInfo } from '../types';
+import { predictNextPeriod, getDayOfCycle, predictNextNPeriods, getCyclePhase, buildCycleHistory } from '../services/predictions';
+import { buildDateSets, type CalendarDateSets } from '../services/calendarSets';
 import { uploadAfterMutation } from '../services/syncService';
 
 interface PeriodState {
@@ -10,6 +11,8 @@ interface PeriodState {
   cycleDay: { day: number; total: number; daysUntilNext: number | null; stale: boolean; lastPeriodDate: string } | null;
   futureCycles: FutureCycle[];
   phase: PhaseInfo | null;
+  cycles: CycleInfo[];
+  dateSets: CalendarDateSets;
   loading: boolean;
   error: string | null;
 
@@ -22,12 +25,24 @@ interface PeriodState {
 
 let loadingPromise: Promise<void> | null = null;
 
+const EMPTY_CYCLES: CycleInfo[] = [];
+const EMPTY_DATE_SETS: CalendarDateSets = {
+  periodDates: new Set(),
+  predictedPeriodDates: new Set(),
+  pastFertilityDates: new Set(),
+  futureFertilityDates: new Set(),
+  pastOvulationDates: new Set(),
+  futureOvulationDates: new Set(),
+};
+
 export const usePeriodStore = create<PeriodState>((set, get) => ({
   periods: [],
   prediction: null,
   cycleDay: null,
   futureCycles: [],
   phase: null,
+  cycles: EMPTY_CYCLES,
+  dateSets: EMPTY_DATE_SETS,
   loading: true,
   error: null,
 
@@ -46,12 +61,16 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
         const phase = cycleDay && prediction
           ? getCyclePhase(cycleDay.day, prediction.avgCycleLength, prediction.avgPeriodDuration)
           : null;
+        const cycles = buildCycleHistory(sorted, prediction);
+        const dateSets = buildDateSets(sorted, prediction, futureCycles);
         set({
           periods: sorted,
           prediction,
           cycleDay,
           futureCycles,
           phase,
+          cycles,
+          dateSets,
           loading: false,
           error: null,
         });

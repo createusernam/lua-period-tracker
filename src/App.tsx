@@ -24,7 +24,9 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('home');
   const [editOrigin, setEditOrigin] = useState<Screen>('home');
   const [calendarMode, setCalendarMode] = useState<CalendarViewMode>('month');
-  const { loading, periods, loadPeriods } = usePeriodStore();
+  const loading = usePeriodStore((s) => s.loading);
+  const isEmpty = usePeriodStore((s) => s.periods.length === 0);
+  const loadPeriods = usePeriodStore((s) => s.loadPeriods);
   const { t, lang } = useI18n();
   const importRef = useRef<HTMLInputElement>(null);
 
@@ -153,7 +155,6 @@ export default function App() {
   }
 
   // Home screen
-  const isEmpty = periods.length === 0;
   const today = new Date();
 
   return (

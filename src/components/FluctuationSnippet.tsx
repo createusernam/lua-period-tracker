@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
 import { usePeriodStore } from '../stores/periodStore';
-import { buildCycleHistory } from '../services/predictions';
 import { useI18n } from '../i18n/context';
 
 export default function FluctuationSnippet() {
-  const { periods, prediction } = usePeriodStore();
+  const cycles = usePeriodStore((s) => s.cycles);
+  const prediction = usePeriodStore((s) => s.prediction);
   const { t } = useI18n();
 
   const stats = useMemo(() => {
-    const cycles = buildCycleHistory(periods, prediction);
     const allCompleted = cycles.filter((c) => !c.estimated && c.cycleLength > 0 && c.cycleLength < 90);
     if (allCompleted.length < 2) return null;
 
@@ -28,7 +27,7 @@ export default function FluctuationSnippet() {
       lastPeriodDuration: last.periodDuration,
       avgCycle: prediction?.avgCycleLength ?? 0,
     };
-  }, [periods, prediction]);
+  }, [cycles, prediction]);
 
   if (!stats) return null;
 

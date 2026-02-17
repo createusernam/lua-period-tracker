@@ -1,8 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { parseISO, format, differenceInDays } from 'date-fns';
 import { ru } from 'date-fns/locale/ru';
 import { usePeriodStore } from '../stores/periodStore';
-import { buildCycleHistory } from '../services/predictions';
 import { useI18n } from '../i18n/context';
 import type { CycleInfo } from '../types';
 
@@ -13,12 +12,12 @@ interface Props {
 }
 
 export default function CycleHistory({ limit }: Props) {
-  const { periods, prediction } = usePeriodStore();
+  const cycles = usePeriodStore((s) => s.cycles);
   const { t } = useI18n();
 
   const allCycles = useMemo(() => {
-    return buildCycleHistory(periods, prediction).reverse(); // newest first
-  }, [periods, prediction]);
+    return [...cycles].reverse(); // newest first
+  }, [cycles]);
 
   const displayed = useMemo(() => {
     if (limit) return allCycles.slice(0, limit);
@@ -49,10 +48,10 @@ export default function CycleHistory({ limit }: Props) {
     <div className="cycle-history">
       {!limit && <DotBarLegend />}
 
-      {grouped.map(([year, cycles]) => (
+      {grouped.map(([year, yearCycles]) => (
         <div key={year} className="cycle-year-group">
           <div className="cycle-year-header">{year}</div>
-          {cycles.map((cycle) => (
+          {yearCycles.map((cycle) => (
             <CycleHistoryItem key={cycle.startDate} cycle={cycle} />
           ))}
         </div>
@@ -61,7 +60,7 @@ export default function CycleHistory({ limit }: Props) {
   );
 }
 
-function DotBarLegend() {
+const DotBarLegend = memo(function DotBarLegend() {
   const { t } = useI18n();
   return (
     <div className="dotbar-legend">
@@ -79,9 +78,9 @@ function DotBarLegend() {
       </span>
     </div>
   );
-}
+});
 
-function CycleHistoryItem({ cycle }: { cycle: CycleInfo }) {
+const CycleHistoryItem = memo(function CycleHistoryItem({ cycle }: { cycle: CycleInfo }) {
   const { t, lang } = useI18n();
   const locale = lang === 'ru' ? ru : undefined;
   const startFormatted = format(parseISO(cycle.startDate), 'MMM d', { locale });
@@ -104,7 +103,7 @@ function CycleHistoryItem({ cycle }: { cycle: CycleInfo }) {
       <DotBar cycle={cycle} />
     </div>
   );
-}
+});
 
 function DotBar({ cycle }: { cycle: CycleInfo }) {
   const dots = useMemo(() => {

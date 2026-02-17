@@ -8,13 +8,17 @@ interface Props {
 }
 
 export default function PhaseStatus({ dimmed }: Props) {
-  const { cycleDay, prediction, phase, periods } = usePeriodStore();
+  const cycleDay = usePeriodStore((s) => s.cycleDay);
+  const prediction = usePeriodStore((s) => s.prediction);
+  const phase = usePeriodStore((s) => s.phase);
+  const isEmpty = usePeriodStore((s) => s.periods.length === 0);
+  const isSingle = usePeriodStore((s) => s.periods.length === 1);
   const { t, lang } = useI18n();
 
   // Empty state — dimmed "No data"
-  if (periods.length === 0) {
+  if (isEmpty) {
     return (
-      <div className="phase-status" style={dimmed ? { opacity: 0.4 } : undefined}>
+      <div className={`phase-status${dimmed ? ' dimmed' : ''}`}>
         <div className="phase-name">{t('status.no_data')}</div>
       </div>
     );
@@ -32,7 +36,7 @@ export default function PhaseStatus({ dimmed }: Props) {
   }
 
   // Only 1 period — no predictions yet
-  if (!prediction || periods.length === 1) {
+  if (!prediction || isSingle) {
     return (
       <div className="phase-status">
         <div className="phase-detail">

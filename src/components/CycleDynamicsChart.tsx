@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { parseISO, format } from 'date-fns';
 import { ru } from 'date-fns/locale/ru';
 import { usePeriodStore } from '../stores/periodStore';
-import { buildCycleHistory } from '../services/predictions';
 import { useI18n } from '../i18n/context';
 
 const CHART_W = 350;
@@ -36,12 +35,11 @@ function smoothPath(points: { x: number; y: number }[]): string {
 }
 
 export default function CycleDynamicsChart() {
-  const { periods, prediction } = usePeriodStore();
+  const cycles = usePeriodStore((s) => s.cycles);
   const { t, lang } = useI18n();
   const locale = lang === 'ru' ? ru : undefined;
 
   const data = useMemo((): DataPoint[] => {
-    const cycles = buildCycleHistory(periods, prediction);
     const valid = cycles
       .filter((c) => c.cycleLength > 0 && c.cycleLength < 90 && !c.estimated)
       .slice(-12);
@@ -51,7 +49,7 @@ export default function CycleDynamicsChart() {
       label: format(parseISO(c.startDate), showYear ? "MMM ''yy" : 'MMM', { locale }),
       value: c.cycleLength,
     }));
-  }, [periods, prediction, locale]);
+  }, [cycles, locale]);
 
   if (data.length < 2) {
     return null;

@@ -58,6 +58,39 @@ describe('importData', () => {
     const count = await importData(json);
     expect(count).toBe(1);
   });
+
+  it('replaces existing data on import (not append)', async () => {
+    await db.periods.add({ startDate: '2022-01-01', endDate: '2022-01-04' });
+    expect(await db.periods.count()).toBe(1);
+
+    const json = JSON.stringify({
+      version: 1,
+      periods: [
+        { startDate: '2023-01-01', endDate: '2023-01-04' },
+        { startDate: '2023-02-01', endDate: '2023-02-04' },
+      ],
+    });
+    const count = await importData(json);
+    expect(count).toBe(2);
+    expect(await db.periods.count()).toBe(2);
+    // Old data should be gone
+    const all = await db.periods.toArray();
+    expect(all.every((p) => p.startDate.startsWith('2023'))).toBe(true);
+  });
+
+  it('rejects semantically invalid dates (Feb 30)', async () => {
+    const json = JSON.stringify({
+      periods: [{ startDate: '2023-02-30', endDate: null }],
+    });
+    await expect(importData(json)).rejects.toThrow('invalid start date');
+  });
+
+  it('rejects semantically invalid end date', async () => {
+    const json = JSON.stringify({
+      periods: [{ startDate: '2023-01-01', endDate: '2023-13-01' }],
+    });
+    await expect(importData(json)).rejects.toThrow('invalid end date');
+  });
 });
 
 describe('exportData', () => {
