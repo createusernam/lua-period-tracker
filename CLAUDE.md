@@ -2,7 +2,7 @@
 
 ## Project
 
-Lua — Private period tracker PWA. Built entirely on Linux/WSL2, deployed as a Progressive Web App for iOS Safari (no Apple Developer account needed).
+Lua — Private period tracker PWA. Works in all modern browsers (Chrome, Safari, Firefox, Edge). Installable on iOS (Safari → Share → Add to Home Screen) and Android (Chrome → Install).
 
 ## Commands
 
@@ -83,11 +83,11 @@ Arutyunov IDS + Birman/Bureau Gorbunov:
 ### Testing
 - Vitest + @testing-library/react + fake-indexeddb
 - Setup: `src/test/setup.ts` imports fake-indexeddb/auto
-- Tests: `src/test/*.test.ts(x)` — 60 tests across predictions, utils, db, import/export, components
+- Tests: `src/test/*.test.ts(x)` — 88 tests across predictions, utils, db, import/export, components
 - `beforeEach`: clear all DB tables + reset Zustand via `store.setState()`
 
 ### Deployment
-Build produces static files in `dist/`. Deploy to GitHub Pages or Vercel. Install on iPhone via Safari → Share → Add to Home Screen.
+Build produces static files in `dist/`. Deploy to GitHub Pages, Vercel, or any static host. See `docs/DEPLOY.md` for GitHub Pages and VPS guides.
 
 ### Agent Team
 
