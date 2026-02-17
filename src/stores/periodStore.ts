@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { db } from '../db';
 import type { Period, CyclePrediction, FutureCycle, PhaseInfo } from '../types';
 import { predictNextPeriod, getDayOfCycle, predictNextNPeriods, getCyclePhase } from '../services/predictions';
+import { uploadAfterMutation } from '../services/syncService';
 
 interface PeriodState {
   periods: Period[];
@@ -70,6 +71,7 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
     try {
       await db.periods.add({ ...period });
       await get().loadPeriods();
+      uploadAfterMutation();
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Failed to save period' });
       throw err;
@@ -80,6 +82,7 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
     try {
       await db.periods.update(id, updates);
       await get().loadPeriods();
+      uploadAfterMutation();
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Failed to update period' });
       throw err;
@@ -90,6 +93,7 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
     try {
       await db.periods.delete(id);
       await get().loadPeriods();
+      uploadAfterMutation();
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Failed to delete period' });
       throw err;

@@ -800,6 +800,51 @@ input:focus-visible {
   line-height: 1.4;
 }
 
+/* ============= Cloud Sync ============= */
+
+.sync-status-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-s);
+  padding: var(--sp-m) var(--content-padding);
+  border-top: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sync-dot.idle {
+  background: rgb(var(--text-secondary-rgb));
+}
+
+.sync-dot.syncing {
+  background: rgb(var(--today-rgb));
+  animation: sync-pulse 1.2s ease-in-out infinite;
+}
+
+.sync-dot.success {
+  background: rgb(var(--fertile-rgb));
+}
+
+.sync-dot.error {
+  background: rgb(var(--danger-rgb));
+}
+
+@keyframes sync-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.sync-status-text {
+  font-size: 0.875em;
+  color: var(--color-text-secondary);
+}
+
 /* ============= Calendar Date Picker ============= */
 
 .picker-overlay {

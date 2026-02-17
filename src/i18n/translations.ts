@@ -61,7 +61,7 @@ export const translations = {
     'onboarding.log_first': 'Залогировать первый период',
     'onboarding.welcome': 'Добро пожаловать в Lua',
     'onboarding.subtitle': 'Все данные хранятся локально на вашем устройстве',
-    'onboarding.privacy': 'Все данные хранятся только на вашем устройстве. Без аккаунтов. Без рекламы.',
+    'onboarding.privacy': 'Данные хранятся на вашем устройстве. Резервная копия в Google Drive — по желанию. Без рекламы.',
 
     // Import
     'import.success': 'Данные загружены',
@@ -92,7 +92,7 @@ export const translations = {
     'settings.delete_all': 'Удалить все данные',
     'settings.confirm_delete': 'Удалить ВСЕ данные? Это необратимо.',
     'settings.about': 'О приложении',
-    'settings.about_text': 'Lua — трекер цикла.\nВсе данные хранятся локально.\nБез аккаунтов. Без рекламы. Без слежки.',
+    'settings.about_text': 'Lua — трекер цикла.\nДанные хранятся на устройстве.\nРезервная копия в Google Drive — по желанию.\nLua не видит ваши данные. Без рекламы. Без слежки.',
     'settings.exported': 'Экспорт выполнен',
     'settings.imported': 'Импортировано {count} периодов',
     'settings.deleted': 'Все данные удалены',
@@ -100,6 +100,23 @@ export const translations = {
     'settings.data_section': 'Данные',
     'settings.export_failed': 'Не удалось экспортировать: {error}',
     'settings.import_failed': 'Не удалось импортировать: {error}',
+
+    // Cloud Sync
+    'sync.section_title': 'Облачная синхронизация',
+    'sync.connect': 'Подключить Google Drive',
+    'sync.disconnect': 'Отключить Google Drive',
+    'sync.confirm_disconnect': 'Отключить синхронизацию? Локальные данные сохранятся.',
+    'sync.connected': 'Подключено',
+    'sync.disconnected': 'Не подключено',
+    'sync.connect_failed': 'Не удалось подключиться: {error}',
+    'sync.syncing': 'Синхронизация…',
+    'sync.last_synced': 'Синхронизировано {time}',
+    'sync.error': 'Ошибка синхронизации',
+    'sync.idle': 'Ожидание',
+    'sync.sync_now': 'Синхронизировать',
+    'sync.synced': 'Синхронизировано',
+    'sync.sync_failed': 'Ошибка: {error}',
+    'sync.gis_not_loaded': 'Сервис авторизации не загружен',
 
     // Common
     'common.close': 'Закрыть',
@@ -167,7 +184,7 @@ export const translations = {
     'onboarding.log_first': 'Log first period',
     'onboarding.welcome': 'Welcome to Lua',
     'onboarding.subtitle': 'All data stored locally on your device',
-    'onboarding.privacy': 'All data stored only on your device. No accounts. No ads.',
+    'onboarding.privacy': 'Data stored on your device. Google Drive backup optional. No ads.',
 
     'import.success': 'Data imported',
 
@@ -193,7 +210,7 @@ export const translations = {
     'settings.delete_all': 'Delete all data',
     'settings.confirm_delete': 'Delete ALL data? This cannot be undone.',
     'settings.about': 'About',
-    'settings.about_text': 'Lua — Period Tracker.\nAll data stored locally.\nNo accounts. No ads. No tracking.',
+    'settings.about_text': 'Lua — Period Tracker.\nData stored on your device.\nGoogle Drive backup is optional.\nLua cannot see your data. No ads. No tracking.',
     'settings.exported': 'Exported successfully',
     'settings.imported': 'Imported {count} periods',
     'settings.deleted': 'All data deleted',
@@ -201,6 +218,22 @@ export const translations = {
     'settings.data_section': 'Data',
     'settings.export_failed': 'Export failed: {error}',
     'settings.import_failed': 'Import failed: {error}',
+
+    'sync.section_title': 'Cloud Sync',
+    'sync.connect': 'Connect Google Drive',
+    'sync.disconnect': 'Disconnect Google Drive',
+    'sync.confirm_disconnect': 'Disconnect sync? Local data will be preserved.',
+    'sync.connected': 'Connected',
+    'sync.disconnected': 'Disconnected',
+    'sync.connect_failed': 'Connection failed: {error}',
+    'sync.syncing': 'Syncing…',
+    'sync.last_synced': 'Synced {time}',
+    'sync.error': 'Sync error',
+    'sync.idle': 'Idle',
+    'sync.sync_now': 'Sync now',
+    'sync.synced': 'Synced',
+    'sync.sync_failed': 'Error: {error}',
+    'sync.gis_not_loaded': 'Auth service not loaded',
 
     'common.close': 'Close',
 

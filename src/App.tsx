@@ -5,6 +5,8 @@ import { db } from './db';
 import { initializeDatabase } from './db';
 import { usePeriodStore } from './stores/periodStore';
 import { importData } from './services/importExport';
+import { initTokenClient } from './services/googleAuth';
+import { downloadOnStart, uploadAfterMutation, initSync, useSyncStore, weeklyBackupIfNeeded } from './services/syncService';
 import { useI18n } from './i18n/context';
 import PhaseStatus from './components/PhaseStatus';
 import HomeCalendar from './components/HomeCalendar';
@@ -27,7 +29,17 @@ export default function App() {
   const importRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    initializeDatabase().then(() => loadPeriods());
+    initializeDatabase().then(async () => {
+      initTokenClient();
+      await initSync();
+      // initSync restores connected state from token presence in localStorage.
+      // getValidToken() inside downloadOnStart will silently refresh if expired.
+      if (useSyncStore.getState().connected) {
+        await downloadOnStart();
+        weeklyBackupIfNeeded();
+      }
+      await loadPeriods();
+    });
   }, []);
 
   // Navigation handlers
@@ -68,6 +80,7 @@ export default function App() {
       }
     });
     await loadPeriods();
+    uploadAfterMutation();
   }, [loadPeriods]);
 
   // Import handler for onboarding

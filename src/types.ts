@@ -23,6 +23,7 @@ export interface CyclePrediction {
   avgPeriodDuration: number;
   confidence: 'high' | 'medium' | 'low';
   stddev: number;
+  daysLate: number;
 }
 
 export interface FertilityWindow {

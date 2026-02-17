@@ -21,29 +21,44 @@ export function predictNextPeriod(
   periods: Period[],
   windowSize: number = 6
 ): CyclePrediction | null {
-  const sorted = [...periods]
+  const completed = [...periods]
     .filter((p) => p.endDate !== null)
     .sort(
       (a, b) =>
         parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime()
     );
 
-  if (sorted.length < 2) return null;
+  if (completed.length < 2) return null;
 
-  // Calculate cycle lengths
+  // Calculate cycle lengths from completed periods
   const cycleLengths: number[] = [];
-  for (let i = 1; i < sorted.length; i++) {
+  for (let i = 1; i < completed.length; i++) {
     const len = differenceInDays(
-      parseISO(sorted[i].startDate),
-      parseISO(sorted[i - 1].startDate)
+      parseISO(completed[i].startDate),
+      parseISO(completed[i - 1].startDate)
     );
     if (len > 0 && len < 90) cycleLengths.push(len);
   }
 
   if (cycleLengths.length === 0) return null;
 
-  // Calculate period durations
-  const durations = sorted.map((p) =>
+  // Include ongoing period in cycle length data (use most recent if multiple)
+  const ongoing = [...periods]
+    .filter((p) => p.endDate === null)
+    .sort((a, b) => parseISO(b.startDate).getTime() - parseISO(a.startDate).getTime())[0] ?? null;
+  if (ongoing) {
+    const lastCompleted = completed[completed.length - 1];
+    const lenToOngoing = differenceInDays(
+      parseISO(ongoing.startDate),
+      parseISO(lastCompleted.startDate)
+    );
+    if (lenToOngoing > 0 && lenToOngoing < 90) {
+      cycleLengths.push(lenToOngoing);
+    }
+  }
+
+  // Calculate period durations (completed only)
+  const durations = completed.map((p) =>
     differenceInDays(parseISO(p.endDate!), parseISO(p.startDate)) + 1
   );
 
@@ -52,13 +67,27 @@ export function predictNextPeriod(
     weightedAverage(durations, windowSize)
   );
 
-  const lastPeriod = sorted[sorted.length - 1];
-  const predictedStart = addDays(parseISO(lastPeriod.startDate), avgCycleLength);
+  // Anchor on ongoing period if it's more recent than last completed, otherwise last completed
+  const lastCompletedStart = parseISO(completed[completed.length - 1].startDate);
+  const anchor = ongoing && parseISO(ongoing.startDate) > lastCompletedStart
+    ? parseISO(ongoing.startDate)
+    : lastCompletedStart;
+  const predictedStart = addDays(anchor, avgCycleLength);
   const predictedEnd = addDays(predictedStart, avgPeriodDuration - 1);
 
+  // Calculate days late
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const daysLate = predictedStart < today
+    ? differenceInDays(today, predictedStart)
+    : 0;
+
   const sd = stddev(cycleLengths.slice(-windowSize));
-  const confidence: CyclePrediction['confidence'] =
+  let confidence: CyclePrediction['confidence'] =
     sd <= 2 ? 'high' : sd <= 5 ? 'medium' : 'low';
+
+  // Lower confidence when period is late
+  if (daysLate > 0) confidence = 'low';
 
   return {
     predictedStart: format(predictedStart, 'yyyy-MM-dd'),
@@ -67,6 +96,7 @@ export function predictNextPeriod(
     avgPeriodDuration,
     confidence,
     stddev: Math.round(sd * 10) / 10,
+    daysLate,
   };
 }
 
@@ -208,8 +238,12 @@ export function predictNextNPeriods(
   if (!basePrediction) return [];
 
   const results: FutureCycle[] = [];
-  let currentStart = basePrediction.predictedStart;
   const avgCycle = basePrediction.avgCycleLength;
+
+  // If prediction is in the past (period late), shift chain forward to today
+  let currentStart = basePrediction.daysLate > 0
+    ? format(new Date(), 'yyyy-MM-dd')
+    : basePrediction.predictedStart;
   const avgPeriod = basePrediction.avgPeriodDuration;
 
   for (let i = 0; i < n; i++) {

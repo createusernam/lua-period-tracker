@@ -84,6 +84,7 @@ describe('CycleHistory', () => {
         avgPeriodDuration: 4,
         confidence: 'high',
         stddev: 0,
+        daysLate: 0,
       },
     });
     renderWithI18n(<CycleHistory />);
@@ -121,6 +122,7 @@ describe('CycleHistory', () => {
         avgPeriodDuration: 4,
         confidence: 'high',
         stddev: 0,
+        daysLate: 0,
       },
     });
     const { container } = renderWithI18n(<CycleHistory limit={2} />);

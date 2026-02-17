@@ -1,4 +1,5 @@
 import { format, differenceInDays, parseISO } from 'date-fns';
+import type { Language } from './types';
 
 export function formatDateRange(start: string, end: string | null): string {
   const s = parseISO(start);
@@ -24,4 +25,24 @@ export function cycleLengthBetween(
   previousStart: string
 ): number {
   return differenceInDays(parseISO(currentStart), parseISO(previousStart));
+}
+
+export function formatRelativeTime(isoString: string, lang: Language): string {
+  const diffMs = Date.now() - new Date(isoString).getTime();
+  const seconds = Math.floor(diffMs / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (lang === 'ru') {
+    if (seconds < 60) return 'только что';
+    if (minutes < 60) return `${minutes} мин. назад`;
+    if (hours < 24) return `${hours} ч. назад`;
+    return `${days} дн. назад`;
+  }
+
+  if (seconds < 60) return 'just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  return `${days}d ago`;
 }
