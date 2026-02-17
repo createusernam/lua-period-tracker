@@ -45,7 +45,7 @@ npm run preview    # Preview production build
 - `periodStore.ts` — Zustand: periods CRUD, prediction, cycleDay. Load-dedup to prevent race conditions.
 
 **Data** (`data/`):
-- `seedPeriods.ts` — 37 periods from Flo (2020-2023), used in tests. Runtime import via `public/flo-history.json`.
+- `seedPeriods.ts` — Synthetic demo periods (2022-2025), used in tests. Runtime import via `public/flo-history.json`.
 
 **Styles** (`styles/`):
 - `index.css` — ALL styles (no inline `<style>` tags in components). CSS custom properties for theming. Design system: Arutyunov IDS + Birman/Bureau Gorbunov typography.
@@ -131,7 +131,7 @@ Reference screenshots at `/home/natal/projects/Flo/IMG_8321-8328.PNG`.
 | Cycle history with dot-bar visualization | Done | `CycleHistory.tsx` |
 | Fertility window + ovulation markers | Done | `predictions.ts` |
 | Filter pills (All / Last 3 / Last 6) | Done | `CycleHistory.tsx` |
-| Seed data → importable JSON | Done | `public/flo-history.json` |
+| Demo data → importable JSON | Done | `public/flo-history.json` |
 | Fix stale cycle status | Done | `CycleStatus.tsx` + `predictions.ts` |
 
 ### Known Constraints

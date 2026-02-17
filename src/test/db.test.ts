@@ -29,7 +29,7 @@ describe('initializeDatabase', () => {
 
 describe('seedPeriods data integrity', () => {
   it('has correct number of periods', () => {
-    expect(seedPeriods.length).toBe(66);
+    expect(seedPeriods.length).toBe(40);
   });
 
   it('all periods have valid date format', () => {
@@ -52,8 +52,8 @@ describe('seedPeriods data integrity', () => {
     }
   });
 
-  it('covers years 2020-2023', () => {
+  it('covers years 2022-2025', () => {
     const years = new Set(seedPeriods.map((p) => p.startDate.slice(0, 4)));
-    expect(years).toEqual(new Set(['2020', '2021', '2022', '2023', '2024', '2025', '2026']));
+    expect(years).toEqual(new Set(['2022', '2023', '2024', '2025']));
   });
 });

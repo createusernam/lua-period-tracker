@@ -789,6 +789,42 @@ input:focus-visible {
   color: var(--color-text-secondary);
 }
 
+.settings-disclaimer {
+  padding: var(--sp-s) var(--content-padding);
+  font-size: 0.8em;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+/* Privacy Policy */
+.privacy-intro {
+  padding: 0 var(--content-padding);
+  font-size: 0.9375em;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--sp-m);
+}
+
+.privacy-section {
+  padding: 0 var(--content-padding);
+  margin-bottom: var(--sp-l);
+}
+
+.privacy-section h3 {
+  font-size: 0.9375em;
+  font-weight: 600;
+  margin: 0 0 var(--sp-xs) 0;
+  color: var(--color-text);
+}
+
+.privacy-section p {
+  font-size: 0.875em;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
 .settings-message {
   text-align: center;
   padding: var(--sp-m);

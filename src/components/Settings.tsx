@@ -5,6 +5,7 @@ import { requestToken, disconnect, initTokenClient } from '../services/googleAut
 import { useSyncStore, syncNow, downloadOnStart } from '../services/syncService';
 import { useI18n } from '../i18n/context';
 import { formatRelativeTime } from '../utils';
+import PrivacyPolicy from './PrivacyPolicy';
 
 interface Props {
   onClose: () => void;
@@ -52,6 +53,7 @@ export default function Settings({ onClose }: Props) {
     setMessage(t('settings.deleted'));
   };
 
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const [connecting, setConnecting] = useState(false);
 
   const handleConnect = async () => {
@@ -103,6 +105,10 @@ export default function Settings({ onClose }: Props) {
       syncStatusText = t('sync.idle');
       syncDotClass = 'sync-dot idle';
     }
+  }
+
+  if (showPrivacy) {
+    return <PrivacyPolicy onClose={() => setShowPrivacy(false)} />;
   }
 
   return (
@@ -168,6 +174,12 @@ export default function Settings({ onClose }: Props) {
               <span key={i}>{i > 0 && <br />}{line}</span>
             ))}
           </div>
+          <div className="settings-disclaimer">
+            {t('settings.disclaimer')}
+          </div>
+          <button className="settings-row" onClick={() => setShowPrivacy(true)}>
+            {t('settings.privacy_policy')}
+          </button>
         </div>
 
         {message && <div className="settings-message">{message}</div>}

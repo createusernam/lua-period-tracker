@@ -2,7 +2,9 @@
 
 ## What is Lua?
 
-Lua is a private period tracker that runs entirely in your browser. No accounts, no servers storing your data, no ads, no tracking. Your menstrual health data stays on your device in IndexedDB, with optional encrypted backup to your own Google Drive.
+Lua is a private period tracker that runs entirely in your browser. No accounts, no servers storing your data, no ads, no tracking. Your menstrual health data stays on your device in IndexedDB, with optional backup to your own Google Drive.
+
+**Disclaimer:** Lua is not a medical device. Cycle predictions, fertility windows, and ovulation estimates are informational only — based on statistical averages of your past data. Do not use them for contraception or medical decisions without consulting a healthcare provider.
 
 The name "Lua" comes from the Portuguese/Spanish word for "moon" — a nod to the lunar cycle and its historical connection to menstrual cycles.
 
@@ -182,7 +184,7 @@ The key insight: **mockup approval is mandatory before specs**. This catches UX 
 | Concern | How It's Addressed |
 |---------|-------------------|
 | **Data storage** | IndexedDB only. Never leaves the browser unless user explicitly enables Google Drive backup. |
-| **Google Drive sync** | OAuth `drive.file` scope — can only access files the app created. Token stored in localStorage with 1-hour expiry. |
+| **Google Drive sync** | OAuth `drive.file` scope — can only access files the app created. Data stored as JSON in your Drive. Token stored in localStorage with 1-hour expiry. |
 | **No analytics** | No Google Analytics, no Mixpanel, no telemetry of any kind. |
 | **No accounts** | No email, no phone, no password. No server to hack. |
 | **Content Security Policy** | Strict CSP in `<meta>` tag — only allows scripts from self and Google's OAuth library. |
@@ -194,4 +196,4 @@ The key insight: **mockup approval is mandatory before specs**. This catches UX 
 - **Code splitting** with React.lazy for faster initial load
 - **Type-safe translation keys** for compile-time i18n safety
 - **Dark mode** via CSS custom property layer
-- **Shared cycles** — anonymous, encrypted sharing between partners
+- **Shared cycles** — anonymous sharing between partners
